@@ -11,7 +11,7 @@ Neither directory is in this repository, because neither is ours: the KiCad sour
 RetroStack's and the ROM images are Tandy's. Every claim needing one skips cleanly when its
 variable is unset and the run still passes — it just checks less, and says so. The
 netlist-backed claims are the exception that needs neither: `kicad-cli`'s own exports are
-committed under `netlists/exports/`, so 63 of the 78 run on a fresh clone with nothing set.
+committed under `netlists/exports/`, so 63 of the 79 run on a fresh clone with nothing set.
 
 ## The rule this folder runs on
 
@@ -80,10 +80,10 @@ All seven restore from the original bytes, and the run then re-reads every one o
 reports whether anything was left behind.
 
 Each mutation corrupts the data in exactly the way one claim denies, and that claim is
-then required to fail. **Sixty-six mutations, sixty-six caught.** A mutation the claim
+then required to fail. **Sixty-seven mutations, sixty-seven caught.** A mutation the claim
 survives is printed as `SURVIVED`, and that is a defect in the claim.
 
-**48 of the 78 claims carry a mutation.** That figure is stated rather than floored, and
+**49 of the 79 claims carry a mutation.** That figure is stated rather than floored, and
 `harness-counts-are-not-stale` holds it to what `mutate.py` actually defines — a floor cannot
 tell a claim that lost its mutation from one that never had one, and a number nothing compares
 against is the trap this whole file exists to describe.

@@ -16,7 +16,7 @@ TRS80_SCHEMATICS=~/schematics TRS80_ROMS=~/roms python3 verify/mutate.py
 ```
 
 **Nothing has to be installed to get most of the way.** `python3 verify/run.py` on a fresh clone
-runs **63 of the 78 claims** and passes, because `kicad-cli`'s netlist export for all eleven
+runs **63 of the 79 claims** and passes, because `kicad-cli`'s netlist export for all eleven
 boards is committed in [`netlists/exports/`](netlists/exports) — derived data, not RetroStack's
 sources. A live export always takes precedence over it, and `committed-exports-are-current`
 requires the two to agree whenever both are possible.
@@ -31,7 +31,7 @@ just checks less and says so:
 | `TRS80_ROMS` | a directory laid out like the emulator's `roms/`: `system/level2-v1.3.bin` and `char/character_set_01/02/04/08/16/17.bin` | the emulator repository below, or your own dumps |
 
 With both set, and `kicad-cli` on the path for the two claims that re-export and rule-check:
-**78 claims pass, and 66 mutations are all caught.** With neither: 63 pass, 15
+**79 claims pass, and 67 mutations are all caught.** With neither: 63 pass, 16
 skip, nothing fails.
 
 ## Where this came from

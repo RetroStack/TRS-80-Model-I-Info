@@ -203,7 +203,7 @@ boots against a doubler modelled this way.
 Eight system ROMs and six character generators — the Level I and Level II builds, and the
 generator images numbered by the option-select value of RetroStack's replacement device. These
 are primary artefacts: a question about what a ROM contains is answered by reading it, and that
-answer outranks any document. Seven claims read from `TRS80_ROMS`, and between them they need
+answer outranks any document. Eight claims read from `TRS80_ROMS`, and between them they need
 seven of these files: `system/level2-v1.3.bin` and all six of `char/`. The system image is a
 combined one — ROM A at `0000–1FFF` then ROM B's lower 4K at `2000–2FFF` — so a claim citing a
 ROM address indexes it directly.
@@ -229,5 +229,6 @@ TRS80_SCHEMATICS=~/schematics python3 verify/run.py --self-test
 which also validates the netlist parser against KiCad's own XML export before testing anything. The assertions covering this document:
 
 - `sources-table-lists-every-board`
+- `rom-images-are-the-images-named`
 
 If a claim below and its assertion disagree, one of them is wrong and the run says so. See [`verify/README.md`](../verify/README.md) for why this exists.

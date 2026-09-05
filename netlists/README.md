@@ -217,8 +217,8 @@ all if it finds itself comparing a file with itself.
 Eight claims still need more than a netlist and skip without `TRS80_SCHEMATICS`: the two that
 read `.kicad_pcb` copper, the one that reads wire geometry out of a `.kicad_sch`, the three that
 read bills of materials, the one that runs the rule check, and the one just described, which
-has nothing to compare the committed exports against. With the ROM-backed seven that makes the
-fifteen claims a bare clone skips.
+has nothing to compare the committed exports against. With the ROM-backed eight that makes the
+sixteen claims a bare clone skips.
 
 ## How the claims here are checked
 

@@ -19,6 +19,10 @@ CLAIMS = []
 # device dumps this used to read were ROM A alone, and are gone.
 L2_IMAGE = "system/level2-v1.3.bin"
 CHARGEN = "char/character_set_{:02d}.bin"
+CHARGEN_SETS = (1, 2, 4, 8, 16, 17)
+# The compressed form README.md prints the six under, built from the same tuple
+# so the page and the lookup cannot name different files.
+CHARGEN_ROW = "char/character_set_" + "/".join(f"{n:02d}" for n in CHARGEN_SETS) + ".bin"
 
 
 def claim(cid, doc, text):
@@ -2207,3 +2211,44 @@ def _(ctx):
             present -= {p for p in present if p.startswith(f"{d}/")}
     missing = sorted(p for p in present if p not in linked)
     assert not missing, f"documents the index does not link: {missing}"
+
+
+@claim(
+    "rom-images-are-the-images-named",
+    "docs/sources.md",
+    "The seven images TRS80_ROMS supplies are the ones their names say - the "
+    "Level II v1.3 combined image and the six character generators - each held "
+    "to the checksum the emulator publishes for it, and each named by README.md.",
+)
+def _(ctx):
+    import hashlib
+    import pathlib
+
+    # Six of the seven ROM claims cannot tell v1.3 from v1.0: only
+    # rom-keyboard-scan-delays reads a byte the two builds disagree about, and
+    # nothing at all separates v1.3 from the keyboard-bounce patch, which
+    # differs 0x25 past the last offset any claim touches. So "the Level II
+    # v1.3 image", which docs/sources.md states as fact, was an assumption.
+    #
+    # The md5s are the ones the emulator's own roms/README.md prints. Taking
+    # them from there rather than computing them here is the point: a number
+    # invented in one place is a number nothing can contradict.
+    want = {
+        L2_IMAGE: "6f0ac8179fa01cc44720da319ce12a92",
+        CHARGEN.format(1): "918979d8fe83a8f4b73d19fab5a77253",
+        CHARGEN.format(2): "d9363d1c18d212c73b47be9beb50278a",
+        CHARGEN.format(4): "acce35e58214d993233cf5e38f465a32",
+        CHARGEN.format(8): "a1cedb1bd77c10aeb5b4dd7b9fe1b7d3",
+        CHARGEN.format(16): "5ed730e829f759643d13d7f777f9241d",
+        CHARGEN.format(17): "e859275feb268fcda662415b2638454d",
+    }
+    assert set(want) == {L2_IMAGE} | {CHARGEN.format(n) for n in CHARGEN_SETS}
+    for name, md5 in want.items():
+        got = hashlib.md5(ctx.rom(name)).hexdigest()
+        assert got == md5, f"{name} hashes to {got}, not {md5}"
+
+    # And the front page names the files the harness opens. Its not doing so is
+    # how a whole directory of images stopped being found with nothing failing.
+    index = (pathlib.Path(__file__).resolve().parent.parent / "README.md").read_text()
+    for named in (L2_IMAGE, CHARGEN_ROW):
+        assert named in index, f"README.md no longer names {named}"

@@ -295,6 +295,13 @@ def _(ctx):
     ctx.patch_rom(claims_mod.L2_IMAGE, 0x0061, b"\x00")
 
 
+@mutation("rom-images-are-the-images-named", "hand it the keyboard-bounce patch instead")
+def _(ctx):
+    # The three bytes that build differs by, all of them past the last offset
+    # any other claim reads - so this is the mutation no other claim can catch.
+    ctx.patch_rom(claims_mod.L2_IMAGE, 0x0476, b"\x00")
+
+
 @mutation("keyboard-address-is-the-row-select", "drive a row from something else")
 def _(ctx):
     _set(ctx.board("alps"), "Z2", "12", ctx.board("alps").net_of("Z1", "8"))

@@ -12,7 +12,7 @@ generated netlists in [`netlists/`](netlists/README.md) and readings of the draw
 
 **ROM images.** `TRS80_ROMS` points at a directory of them. The Level I and Level II system
 ROMs are Radio Shack / Tandy firmware and are **not** in this repository. The six character
-generator images are likewise not included. Seven claims read them; without the directory those
+generator images are likewise not included. Eight claims read them; without the directory those
 claims skip and the run still passes.
 
 ## Quoted, not reproduced
