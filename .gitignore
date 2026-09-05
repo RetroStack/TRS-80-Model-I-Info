@@ -1,0 +1,8 @@
+.DS_Store
+__pycache__/
+*.pyc
+
+# mutate.py writes these into the repository and removes them again; they are
+# only ever on disk if a run was interrupted.
+/mutation-probe.md
+/unlisted.md
