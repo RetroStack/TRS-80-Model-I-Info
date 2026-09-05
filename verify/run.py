@@ -29,9 +29,11 @@ REPO = HERE.parent
 CACHE = Path(os.environ.get("TMPDIR", "/tmp")) / "trs80-verify-cache"
 
 # ROM images are third-party firmware and are not in this repository. TRS80_ROMS
-# names a directory holding them; a `roms/` inside this repository or beside it
-# is used if one happens to be there, which is what lets this run unchanged
-# inside a tree that already has the images.
+# names a directory laid out the way the emulator's `roms/` is - `system/` for
+# the combined system images, `char/` for the character generators - and a
+# `roms/` inside this repository or beside it is used if one happens to be
+# there, which is what lets this run unchanged inside a tree that already has
+# the images.
 ROM_DIRS = [Path(d) for d in (os.environ.get("TRS80_ROMS"),) if d]
 ROM_DIRS += [REPO / "roms", REPO.parent / "roms"]
 
@@ -58,11 +60,19 @@ class Ctx:
         return self._boards[name]
 
     def rom(self, name):
+        """Read a ROM image by its path under a ROM directory.
+
+        `name` carries the subdirectory - `system/…` or `char/…` - because that
+        is how the images are laid out where they come from, and because a
+        directory that holds the right bytes under the wrong names is a
+        misconfiguration the message below has to be able to describe.
+        """
         for d in ROM_DIRS:
             p = d / name
             if p.exists():
                 return p.read_bytes()
-        raise Skip(f"{name} not found; set TRS80_ROMS to a directory of ROM images")
+        raise Skip(f"{name} not found; point TRS80_ROMS at a directory laid out "
+                   f"like the emulator's roms/ (system/ and char/)")
 
 
 def self_test(ctx):

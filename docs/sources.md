@@ -204,7 +204,9 @@ Eight system ROMs and six character generators — the Level I and Level II buil
 generator images numbered by the option-select value of RetroStack's replacement device. These
 are primary artefacts: a question about what a ROM contains is answered by reading it, and that
 answer outranks any document. Seven claims read from `TRS80_ROMS`, and between them they need
-two of these files: the Level II v1.3 system image and all six generators.
+seven of these files: `system/level2-v1.3.bin` and all six of `char/`. The system image is a
+combined one — ROM A at `0000–1FFF` then ROM B's lower 4K at `2000–2FFF` — so a claim citing a
+ROM address indexes it directly.
 
 ### The emulator, as an instrument
 

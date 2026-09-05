@@ -28,7 +28,7 @@ just checks less and says so:
 | variable | what it points at | where to get it |
 |---|---|---|
 | `TRS80_SCHEMATICS` | a directory holding RetroStack's KiCad board repositories, one folder per board | github.com/RetroStack |
-| `TRS80_ROMS` | a directory of Model I ROM images, looked up by name: `rom_a_L2_v13.bin` and `character_set_01/02/04/08/16/17.bin` | the emulator repository below, or your own dumps |
+| `TRS80_ROMS` | a directory laid out like the emulator's `roms/`: `system/level2-v1.3.bin` and `char/character_set_01/02/04/08/16/17.bin` | the emulator repository below, or your own dumps |
 
 With both set, and `kicad-cli` on the path for the two claims that re-export and rule-check:
 **78 claims pass, and 66 mutations are all caught.** With neither: 63 pass, 15

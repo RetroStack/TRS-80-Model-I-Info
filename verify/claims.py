@@ -12,6 +12,14 @@ import re
 
 CLAIMS = []
 
+# The ROM images, at the paths the emulator's `roms/` lays them out under. The
+# Level II file is a *combined* image - ROM A at 0000-1FFF followed by ROM B's
+# addressable lower 4K at 2000-2FFF - so a file offset is the address the CPU
+# fetches from, which is the form every ROM claim below is written in. The split
+# device dumps this used to read were ROM A alone, and are gone.
+L2_IMAGE = "system/level2-v1.3.bin"
+CHARGEN = "char/character_set_{:02d}.bin"
+
 
 def claim(cid, doc, text):
     def deco(fn):
@@ -750,7 +758,7 @@ def _(ctx):
     "cassette motor is bit 2.",
 )
 def _(ctx):
-    d = ctx.rom("rom_a_L2_v13.bin")
+    d = ctx.rom(L2_IMAGE)
     assert d[0x0216:0x0219] == bytes([0x21, 0x04, 0xFF]), d[0x0216:0x0219].hex()
 
 
@@ -810,7 +818,7 @@ def _(ctx):
     "a rewrite with no change, purely for the side effect.",
 )
 def _(ctx):
-    d = ctx.rom("rom_a_L2_v13.bin")
+    d = ctx.rom(L2_IMAGE)
     assert d[0x021E:0x0221] == bytes([0x21, 0x00, 0xFF]), d[0x021E:0x0221].hex()
     assert d[0x0224:0x0226] == bytes([0xA4, 0xB5]), "expected AND H / OR L"
     assert d[0x0226:0x0228] == bytes([0xD3, 0xFF]), "expected OUT (0FFh),A"
@@ -828,11 +836,10 @@ def _(ctx):
         assert len(d) == 1024, f"{name} is {len(d)} bytes"
         return [sum(1 for g in range(128) if d[g * 8 + r]) for r in range(8)]
 
-    for name in ("character_set_01.bin", "character_set_02.bin", "character_set_04.bin",
-                 "character_set_17.bin"):
+    for name in (CHARGEN.format(n) for n in (1, 2, 4, 17)):
         r = rows(name)
         assert r[0] == 0, f"{name} row 0 used by {r[0]} glyphs, expected 0"
-    for name in ("character_set_08.bin", "character_set_16.bin"):
+    for name in (CHARGEN.format(n) for n in (8, 16)):
         r = rows(name)
         assert r[0] > 50, f"{name} row 0 used by {r[0]}"
         assert 0 < r[7] <= 12, f"{name} row 7 used by {r[7]}, expected a descender-sized set"
@@ -1185,7 +1192,7 @@ def _(ctx):
     "-70h+40h for rows 4-5, an XOR 10h above 3Ch, and a table at 0050h for row 6.",
 )
 def _(ctx):
-    d = ctx.rom("rom_a_L2_v13.bin")
+    d = ctx.rom(L2_IMAGE)
     # The instruction bytes that implement it, at the addresses the claim names.
     for addr, want in (
         (0x03FE, b"\x07\x57\x0e\x01"),          # RLCA / LD D,A / LD C,1
@@ -1228,7 +1235,7 @@ def _(ctx):
     import pathlib
 
     a = ctx.board("alps")
-    d = ctx.rom("rom_a_L2_v13.bin")
+    d = ctx.rom(L2_IMAGE)
 
     # Where each switch sits, followed from its row driver and its column buffer
     # rather than taken from the document it is checking.
@@ -1351,7 +1358,7 @@ def _(ctx):
     "writes 255 zero bytes and not 256.",
 )
 def _(ctx):
-    d = ctx.rom("rom_a_L2_v13.bin")
+    d = ctx.rom(L2_IMAGE)
     assert d[0x0287:0x0289] == bytes([0x06, 0xFF]), d[0x0287:0x0289].hex()
     assert d[0x0289] == 0xAF, "expected XOR A before the loop"
     assert d[0x028A:0x028D] == bytes([0xCD, 0x64, 0x02]), "expected CALL 0264h"
@@ -1368,7 +1375,7 @@ def _(ctx):
     "and 51.3 ms, 70.1 ms in which it is not scanning.",
 )
 def _(ctx):
-    d = ctx.rom("rom_a_L2_v13.bin")
+    d = ctx.rom(L2_IMAGE)
     # The delay routine itself: DEC BC / LD A,B / OR C / JR NZ,-5 / RET.
     assert d[0x0060:0x0066] == b"\x0b\x78\xb1\x20\xfb\xc9", d[0x0060:0x0066].hex()
     # 6 + 4 + 4 + 12 taken; the last pass takes 7, and the RET is 10.

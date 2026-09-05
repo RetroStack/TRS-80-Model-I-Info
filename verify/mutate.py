@@ -272,27 +272,27 @@ def _(ctx):
 
 @mutation("level2-leader-is-255-bytes", "make the leader loop LD B,0")
 def _(ctx):
-    ctx.patch_rom("rom_a_L2_v13.bin", 0x0288, b"\x00")
+    ctx.patch_rom(claims_mod.L2_IMAGE, 0x0288, b"\x00")
 
 
 @mutation("rom-keyboard-map-arithmetic", "change the row 4-5 bias")
 def _(ctx):
-    ctx.patch_rom("rom_a_L2_v13.bin", 0x042A, b"\x60")
+    ctx.patch_rom(claims_mod.L2_IMAGE, 0x042A, b"\x60")
 
 
 @mutation("rom-keyboard-map-arithmetic", "move the control-key table")
 def _(ctx):
-    ctx.patch_rom("rom_a_L2_v13.bin", 0x0444, b"\x70")
+    ctx.patch_rom(claims_mod.L2_IMAGE, 0x0444, b"\x70")
 
 
 @mutation("rom-keyboard-scan-delays", "halve the debounce constant")
 def _(ctx):
-    ctx.patch_rom("rom_a_L2_v13.bin", 0x011E, b"\x80\x02")
+    ctx.patch_rom(claims_mod.L2_IMAGE, 0x011E, b"\x80\x02")
 
 
 @mutation("rom-keyboard-scan-delays", "make the delay loop one instruction shorter")
 def _(ctx):
-    ctx.patch_rom("rom_a_L2_v13.bin", 0x0061, b"\x00")
+    ctx.patch_rom(claims_mod.L2_IMAGE, 0x0061, b"\x00")
 
 
 @mutation("keyboard-address-is-the-row-select", "drive a row from something else")
