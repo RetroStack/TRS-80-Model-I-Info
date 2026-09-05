@@ -1,7 +1,7 @@
 # The Model I RS-232-C card — a sheet-by-sheet reading
 
 Source: `Model I RS232.pdf`, *TRS-80 Model I RS-232 Interface*, Rev 2.1, Roger Murley /
-BYTESHIFT, KiCad 9.0.0, one sheet. This is a modern rebuild rather than a reconstruction of
+BYTESHiFT, KiCad 9.0.0, one sheet. This is a modern rebuild rather than a reconstruction of
 the original 26-1145 card: the 1488/1489 line drivers are replaced by a single SP3243 and the
 TR1602 by its pin-compatible HD6402. It is programmed identically, which is what makes it
 usable as the reference.
@@ -104,8 +104,8 @@ connector, which [`schematics-model-1-ei-rev-d.md`](schematics-model-1-ei-rev-d.
 gives as `J10` on the *Expansion Interface* side, carrying `D0`–`D7`, `/SYSRES`, `/IN`, `/OUT`
 and `/INT`. Which designator the *card* gives its own edge is what is not established.
 
-**What would settle it:** reading the connector designators off the sheet directly. This board
-has no KiCad source, so nothing here can re-derive them.
+**What would settle it:** reading the connector designators off the sheet directly. Only the
+plotted PDF is published, not the KiCad project behind it, so nothing here can re-derive them.
 
 Nothing an emulator does turns on the answer: the ports and the bits they carry are settled
 above, and no connector name reaches software.
@@ -124,10 +124,12 @@ above, and no connector name reaches software.
 
 ## How the claims here are checked
 
-This board has no KiCad source and no machine-readable drawing, so nothing in this document can
-be re-derived by the harness. Every statement here is a reading of a hand-drawn or rasterised
-scan — a single, unverifiable source, as [`sources.md`](sources.md) ranks it — and the
-`[unresolved]` note above marks where that reading does not settle the question.
+The drawing is a single KiCad-plotted sheet and its text extracts cleanly, so this is a reading
+of type rather than of a scan — which is why it outranks the Percom drawings in
+[`sources.md`](sources.md). But the KiCad project itself is not published, only the PDF, so
+there is no netlist for the harness to assert against and nothing in this document can be
+re-derived. It remains a single source, and the `[unresolved]` note above marks where reading
+it does not settle the question.
 
 The values were cross-checked against a working emulator during development; that check lives in
 the emulator's own test suite rather than here, because it tests the emulator and not the board.

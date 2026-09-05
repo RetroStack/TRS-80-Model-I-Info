@@ -4,12 +4,14 @@ Every factual claim in `docs/` that can be tested has an executable assertion he
 the assertions run.
 
 ```sh
-TRS80_SCHEMATICS=~/schematics python3 verify/run.py --self-test
+TRS80_SCHEMATICS=~/schematics TRS80_ROMS=~/roms python3 verify/run.py --self-test
 ```
 
-Without `TRS80_SCHEMATICS` the netlist-backed claims skip and the run still passes — the same
-convention `TRS80_TEST_DISKS` uses elsewhere in this project, because the KiCad sources are
-third-party and are not in this repository. The ROM-backed claims always run; `roms/` is here.
+Neither directory is in this repository, because neither is ours: the KiCad sources are
+RetroStack's and the ROM images are Tandy's. Every claim needing one skips cleanly when its
+variable is unset and the run still passes — it just checks less, and says so. The
+netlist-backed claims are the exception that needs neither: `kicad-cli`'s own exports are
+committed under `netlists/exports/`, so 63 of the 78 run on a fresh clone with nothing set.
 
 ## The rule this folder runs on
 
@@ -67,13 +69,15 @@ So the harness is mutation-tested, and the mutations are a committed script rath
 something done once by hand:
 
 ```sh
-TRS80_SCHEMATICS=~/schematics python3 verify/mutate.py
+TRS80_SCHEMATICS=~/schematics TRS80_ROMS=~/roms python3 verify/mutate.py
 ```
 
-Most mutations corrupt the parsed data in memory. Two write into the repository, and one edits a
-KiCad source sheet — the only way to prove that `enable-pins-are-clear-of-the-data-rows` really
-watches the drawing rather than a copy of it. All of those restore from the original bytes, and
-the run checks afterwards that nothing was left behind.
+Most mutations corrupt the parsed data in memory. Six write into the repository — a committed
+netlist export, three documents, and two probe files that exist only while the claim reading
+them runs — and one edits a KiCad source sheet, the only way to prove that
+`enable-pins-are-clear-of-the-data-rows` really watches the drawing rather than a copy of it.
+All seven restore from the original bytes, and the run then re-reads every one of them and
+reports whether anything was left behind.
 
 Each mutation corrupts the data in exactly the way one claim denies, and that claim is
 then required to fail. **Sixty-six mutations, sixty-six caught.** A mutation the claim
@@ -104,7 +108,7 @@ ones that can:
 |---|---|---|
 | `NET` | connectivity | assertion against the exported netlists |
 | `BOM` | a part's identity | assertion against the bill of materials |
-| `ROM` | a byte in a ROM image | assertion against `roms/*.bin` |
+| `ROM` | a byte in a ROM image | assertion against the images `TRS80_ROMS` points at |
 | `RUN` | machine behaviour | running the emulator; `run.py` cannot do this, so the document carries the steps to reproduce it |
 | `DOC` | a period document says it | quoted with a page number; not mechanisable |
 | `DERIVED` | arithmetic over the above | assertion recomputing it |

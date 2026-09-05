@@ -143,8 +143,8 @@ This is the circuit-level statement of what [`video.md`](video.md) describes: 10
 
 Three things the emulator implements trace to these sheets rather than to the ROM:
 
-1. **`IN (0FFh)` bit 6 is not undriven.** The old `io-port-map.md` note and the
-   `hardware-interfacing` skill both said "floats high"; `Z44F` says otherwise.
+1. **`IN (0FFh)` bit 6 is not undriven.** Notes written before these sheets were read said
+   it "floats high"; `Z44F` says otherwise.
 2. **Port `FF` bit 3 is inverted on the way out of the latch.** The software-visible
    behaviour (write 1 for 32 columns) is unchanged, but the board-level signal is
    `MODESEL` active high for 64 columns, which is what the readback reports.

@@ -28,9 +28,10 @@ just checks less and says so:
 | variable | what it points at | where to get it |
 |---|---|---|
 | `TRS80_SCHEMATICS` | a directory holding RetroStack's KiCad board repositories, one folder per board | github.com/RetroStack |
-| `TRS80_ROMS` | a directory of Model I ROM images — the Level II system ROM and the six character generators | the emulator repository below, or your own dumps |
+| `TRS80_ROMS` | a directory of Model I ROM images, looked up by name: `rom_a_L2_v13.bin` and `character_set_01/02/04/08/16/17.bin` | the emulator repository below, or your own dumps |
 
-With both set: **78 claims pass, and 66 mutations are all caught.** With neither: 63 pass, 15
+With both set, and `kicad-cli` on the path for the two claims that re-export and rule-check:
+**78 claims pass, and 66 mutations are all caught.** With neither: 63 pass, 15
 skip, nothing fails.
 
 ## Where this came from
@@ -77,8 +78,9 @@ dead link at any commit — there are none outstanding at present.
 ## Licence and sources
 
 The documents and the harness are MIT, in [`LICENSE`](LICENSE). Everything they describe belongs
-to someone else and none of it is redistributed here — the schematics, the ROM images and the
-period manuals are covered in [`NOTICE.md`](NOTICE.md).
+to someone else: no schematic, ROM image or manual page is redistributed here, and the one thing
+derived from someone else's work that is — `kicad-cli`'s netlists, generated from RetroStack's
+boards — is called out as such. [`NOTICE.md`](NOTICE.md) covers all of it.
 
 ---
 

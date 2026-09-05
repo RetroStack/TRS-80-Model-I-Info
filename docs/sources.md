@@ -37,8 +37,8 @@ document that hides its uncertainty is not more correct, only more confident.
 | Expansion Interface Service Manual | period primary | yes, OCR | high |
 | Model I RS-232 (Murley / BYTESHiFT) | modern **rebuild**, not the original card | yes | good, with a caveat |
 | Percom Doubler drawings | hand-drawn scans of **two different boards** | **no — zero extractable text** | weakest |
-| The ROM and character images in `roms/` | primary artefact | yes | measurable directly |
-| This emulator and its test suite | instrument | n/a | measures behaviour, not circuits |
+| The ROM and character images `TRS80_ROMS` points at | primary artefact | yes | measurable directly |
+| The emulator and its test suite | instrument | n/a | measures behaviour, not circuits |
 
 **None of these files is in this repository.** The schematics, the manuals and the ROM images
 are all third-party material. `TRS80_SCHEMATICS` points the harness at the KiCad repositories
@@ -203,9 +203,10 @@ boots against a doubler modelled this way.
 Eight system ROMs and six character generators — the Level I and Level II builds, and the
 generator images numbered by the option-select value of RetroStack's replacement device. These
 are primary artefacts: a question about what a ROM contains is answered by reading it, and that
-answer outranks any document. The harness reads them from `TRS80_ROMS`.
+answer outranks any document. Seven claims read from `TRS80_ROMS`, and between them they need
+two of these files: the Level II v1.3 system image and all six generators.
 
-### This emulator, as an instrument
+### The emulator, as an instrument
 
 The emulator does not establish what is connected to what. What it does is let a circuit claim
 with a software-visible consequence be *tested*: if bit 6 of port `FF` really is a readback of the

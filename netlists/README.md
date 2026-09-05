@@ -68,7 +68,7 @@ Every file was checked before it was written, and every check passed:
 3. **Against independent sources**, for the claims that matter. The Expansion Interface's
    `Z43` decode inputs, its timer flip-flops, its motor one-shot values and its `/SYSRES`
    distribution all match the Radio Shack service manual — the floppy half of that is in
-   [`../floppy.md`](../docs/floppy.md). The Rev G part-to-designator map
+   [`../docs/floppy.md`](../docs/floppy.md). The Rev G part-to-designator map
    matches the 1978 Radio Shack parts list on every IC. The keyboard adapter's pin map is
    confirmed by two boards it was derived from and by the ROM.
 
@@ -214,9 +214,11 @@ agree, component for component and net for net. It compares the parsed content r
 bytes, so a KiCad version that reformats its output is not a failure, and it refuses to run at
 all if it finds itself comparing a file with itself.
 
-Seven claims still need more than a netlist and skip without `TRS80_SCHEMATICS`: the two that
+Eight claims still need more than a netlist and skip without `TRS80_SCHEMATICS`: the two that
 read `.kicad_pcb` copper, the one that reads wire geometry out of a `.kicad_sch`, the three that
-read bills of materials, and the one that runs the rule check.
+read bills of materials, the one that runs the rule check, and the one just described, which
+has nothing to compare the committed exports against. With the ROM-backed seven that makes the
+fifteen claims a bare clone skips.
 
 ## How the claims here are checked
 
