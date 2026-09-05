@@ -8,10 +8,13 @@ claim survives is reported as SURVIVED, and that is a bug in the claim.
 
     python3 verify/mutate.py
 
-Most mutations touch only the in-memory parse. Two claims read `docs/*.md`
-rather than a netlist, so their mutations write a probe file or append to a
-document; one claim reads a KiCad source sheet, so its mutation edits that sheet.
-`restore()` puts all three back from the original bytes at the end of the run.
+Most mutations touch only the in-memory parse. Six write into the repository -
+into a committed netlist export, into three documents, and two probe files that
+exist only for as long as the claim reading them runs - and one edits a KiCad
+source sheet under TRS80_SCHEMATICS, the only way to prove that claim watches
+the drawing rather than a copy of it. `restore()` puts every one of them back
+from the original bytes, and the run ends by re-reading them to check that it
+did.
 """
 
 import copy
@@ -123,7 +126,7 @@ def _(ctx):
 @mutation("alps-no-matrix-diodes", "add a diode to the key matrix")
 def _(ctx):
     k = ctx.board("alps")
-    k.comps["D99"] = {"value": "1N4148", "sheet": "", "libsource": ("Device", "D")}
+    k.comps["D99"] = {"value": "1N4148", "sheet": "", "lib": ("Device", "D")}
 
 
 @mutation("alps-shift-keys-parallel", "separate the two shift keys")
@@ -134,7 +137,7 @@ def _(ctx):
 @mutation("alps-parts-inventory", "add a sixty-sixth switch")
 def _(ctx):
     ctx.board("alps").comps["SW66"] = {"value": "SW_Push", "sheet": "",
-                                       "libsource": ("Switch", "SW_Push")}
+                                       "lib": ("Switch", "SW_Push")}
 
 
 @mutation("alps-keypad-parallels-main-keys", "give a keypad key its own matrix position")
@@ -155,7 +158,7 @@ def _(ctx):
 @mutation("video-ram-identical-across-us-revisions", "give Rev D an eighth video RAM")
 def _(ctx):
     d = ctx.board("revd")
-    d.comps["Z64"] = {"value": "2102", "sheet": "", "libsource": ("Memory", "2102")}
+    d.comps["Z64"] = {"value": "2102", "sheet": "", "lib": ("Memory", "2102")}
     _set(d, "Z64", "11", "VD6")
 
 
@@ -253,7 +256,7 @@ def _(ctx):
 def _(ctx):
     import pathlib as _pl
     f = _pl.Path(__file__).resolve().parent.parent / "netlists" / "exports" / "psu.net"
-    ctx._docs.setdefault(f, f.read_bytes())
+    ctx.remember(f)
     text = f.read_text()
     old = '(value "1N4001")'
     assert old in text, "psu.net no longer names the rectifier"
@@ -346,7 +349,7 @@ def _(ctx):
 
 @mutation("counting-differences-three-ways", "add a reference to Rev A")
 def _(ctx):
-    ctx.board("reva").comps["Z998"] = {"value": "74LS00", "sheet": "", "libsource": None}
+    ctx.board("reva").comps["Z998"] = {"value": "74LS00", "sheet": "", "lib": None}
 
 
 @mutation("reva-video-sync-differs", "give Rev A all six Z57 inverters")
@@ -383,7 +386,7 @@ def _(ctx):
 
 @mutation("bom-references-all-appear-in-netlist", "add a part no BOM lists")
 def _(ctx):
-    ctx.board("ei").comps["Z997"] = {"value": "74LS00", "sheet": "", "libsource": None}
+    ctx.board("ei").comps["Z997"] = {"value": "74LS00", "sheet": "", "lib": None}
 
 
 @mutation("us-revision-differences-are-complete", "introduce a tenth difference")
@@ -405,14 +408,14 @@ def _(ctx):
 @mutation("sources-table-lists-every-board", "drop a board from the source table")
 def _(ctx):
     p = ctx.RESEARCH / "docs" / "sources.md"
-    ctx._docs.setdefault(p, p.read_bytes())
+    ctx.remember(p)
     p.write_text(p.read_text().replace("Rev E, ", ""))
 
 
 @mutation("self-test-totals-are-not-stale", "let the README's component total go stale")
 def _(ctx):
     p = ctx.HERE_README
-    ctx._docs.setdefault(p, p.read_bytes())
+    ctx.remember(p)
     text = p.read_text()
     assert "1,690 components" in text, "README no longer states the component total"
     p.write_text(text.replace("1,690 components", "1,691 components", 1))
@@ -421,7 +424,7 @@ def _(ctx):
 @mutation("harness-counts-are-not-stale", "let the README's mutation count go stale")
 def _(ctx):
     p = ctx.HERE_README
-    ctx._docs.setdefault(p, p.read_bytes())
+    ctx.remember(p)
     import re
 
     p.write_text(re.sub(r"\*\*[A-Za-z-]+ mutations, [A-Za-z-]+ caught\.\*\*",
@@ -442,7 +445,7 @@ def _(ctx):
 @mutation("ei-sheet-map", "add a second 74LS367 to the Expansion Interface")
 def _(ctx):
     ctx.board("ei").comps["Z52"] = {"value": "74LS367", "sheet": "Line Printer",
-                                    "libsource": None}
+                                    "lib": None}
 
 
 @mutation("japanese-pal-ntsc-decode", "swap the two jumper ends on JP6")
@@ -479,6 +482,33 @@ class MutCtx(runner.Ctx):
         self._pristine = {}
         self._temp = []
         self._docs = {}
+        # restore() clears the two above after every mutation, so by the end of
+        # a run there is nothing left to check against. This ledger is never
+        # cleared: it is what `verify_restored()` compares the tree to.
+        self._ledger = {}
+        self._touched = set()
+
+    def remember(self, p):
+        """Record a file's original bytes before a mutation writes to it.
+
+        Every write into the repository or into TRS80_SCHEMATICS goes through
+        here, so `verify_restored()` has something to compare against.
+        """
+        original = p.read_bytes()
+        self._ledger.setdefault(p, original)
+        self._docs.setdefault(p, original)
+
+    def verify_restored(self):
+        """What the run has been claiming all along: nothing left behind.
+
+        restore() puts each file back from its original bytes, but a claim that
+        it worked is worth no more than any other unchecked claim - and this one
+        is about the repository the reader is standing in.
+        """
+        wrong = [str(p) for p, original in self._ledger.items()
+                 if not p.exists() or p.read_bytes() != original]
+        wrong += [f"{p} still exists" for p in self._touched if p.exists()]
+        return sorted(wrong)
 
     def tempfile(self, name, text):
         """Create a file in the repository that restore() removes."""
@@ -486,19 +516,21 @@ class MutCtx(runner.Ctx):
         assert not p.exists(), f"{name} already exists; refusing to overwrite"
         p.write_text(text)
         self._temp.append(p)
+        self._touched.add(p)
 
     def patch_sheet(self, board, sheet, old, new):
         """Edit a KiCad source sheet, remembering its original bytes.
 
         The only mutation that touches TRS80_SCHEMATICS. restore() puts it back
-        from the original bytes, and the run re-checks that at the end.
+        from the original bytes, and `verify_restored()` re-reads it at the end
+        of the run to check that it did.
         """
         import netlist as _nl
 
         if self.root is None:
             raise runner.Skip("TRS80_SCHEMATICS is not set")
         p = (self.root / _nl.BOARDS[board]).parent / sheet
-        self._docs.setdefault(p, p.read_bytes())
+        self.remember(p)
         text = p.read_text()
         assert old in text, f"{sheet}: nothing to patch"
         p.write_text(text.replace(old, new, 1))
@@ -508,7 +540,7 @@ class MutCtx(runner.Ctx):
     def append_doc(self, name, text):
         """Append to a real document, remembering its original bytes."""
         p = self.RESEARCH / name
-        self._docs.setdefault(p, p.read_bytes())
+        self.remember(p)
         p.write_text(p.read_text() + text)
 
     def board(self, name):
@@ -599,6 +631,15 @@ def main():
     print(f"\n{caught} caught, {survived} survived, {skipped} skipped")
     for m, why in bad:
         print(f"  ! {m['claim']}: {m['what']} — {why}")
+
+    left = ctx.verify_restored()
+    n = len(ctx._ledger) + len(ctx._touched)
+    if left:
+        print(f"\nrestore left {len(left)} of {n} file(s) changed:")
+        for f in left:
+            print(f"  ! {f}")
+        return 1
+    print(f"{n} file(s) written and restored, byte for byte")
     return 1 if survived else 0
 
 

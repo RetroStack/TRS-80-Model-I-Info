@@ -179,6 +179,38 @@ def committed(board: str, fmt="kicadsexpr"):
     return p if p.exists() else None
 
 
+def newest_sheet(root: Path, board: str):
+    """When a board's project was last edited, or None if it is not here.
+
+    Every board is a hierarchy, so the root sheet named in `BOARDS` is not
+    enough to date it by: an edit to a sub-sheet leaves the root untouched.
+    """
+    if root is None:
+        return None
+    d = (root / BOARDS[board]).parent
+    return max((p.stat().st_mtime for p in d.glob("*.kicad_sch")), default=None)
+
+
+def usable_cache(out: Path, root: Path, board: str, fmt: str):
+    """A cache entry, if it can still be trusted. Two ways it cannot.
+
+    The sources may have moved on since it was written, in which case an export
+    that nothing re-derives is exactly the snapshot this folder exists to avoid.
+    Or there may be no sources at all - and then what this repository ships is
+    the answer, not a file some other run happened to leave in the temporary
+    directory. The exception is a format that is not committed: the XML used by
+    the parser self-test has no shipped copy, so a cached one is all there is.
+    """
+    if not out.exists():
+        return None
+    if root is None:
+        return None if committed(board, fmt) else out
+    newest = newest_sheet(root, board)
+    if newest is not None and newest > out.stat().st_mtime:
+        return None
+    return out
+
+
 def export(root: Path, cache: Path, board: str, fmt="kicadsexpr"):
     """Export one board's netlist, caching the result.
 
@@ -187,8 +219,9 @@ def export(root: Path, cache: Path, board: str, fmt="kicadsexpr"):
     """
     ext = {"kicadsexpr": "net", "kicadxml": "xml"}[fmt]
     out = cache / f"{board}.{ext}"
-    if out.exists():
-        return out
+    cached = usable_cache(out, root, board, fmt)
+    if cached is not None:
+        return cached
     cli = kicad_cli()
     if cli is None:
         return committed(board, fmt)
@@ -225,6 +258,11 @@ def erc(root: Path, cache: Path, board: str):
         return None
     cache.mkdir(parents=True, exist_ok=True)
     out = cache / f"{board}.erc.json"
+    # Remembering a report is the thing the docstring above says this does not
+    # do, so a report older than the sheets it describes is thrown away.
+    newest = newest_sheet(root, board)
+    if out.exists() and newest is not None and newest > out.stat().st_mtime:
+        out.unlink()
     if not out.exists():
         cli = kicad_cli()
         if cli is None:

@@ -1886,8 +1886,9 @@ def _(ctx):
     "harness-counts-are-not-stale",
     "verify/README.md",
     "The mutation count verify/README.md prints is the number of mutations that "
-    "exist, every mutation names a claim that exists, and enough claims carry "
-    "one for the coverage figure to mean something.",
+    "exist, every mutation names a claim that exists, the coverage figure is the "
+    "number of claims that carry one, and the totals README.md prints on the "
+    "front page are the totals this harness has.",
 )
 def _(ctx):
     import pathlib
@@ -1924,10 +1925,42 @@ def _(ctx):
     ids = {c["id"] for c in CLAIMS}
     unknown = sorted({x["claim"] for x in mutate.MUTATIONS} - ids)
     assert not unknown, f"mutations naming no claim: {unknown}"
-    # And every mutation-tested claim is a real one, so the coverage figure means
-    # something: how many claims have at least one mutation behind them.
+    # And the coverage figure is stated rather than floored. A bare `>= 25` is a
+    # second hand-maintained constant with nothing to compare it to - the same
+    # stale-data trap as the number words above - and it cannot tell a claim
+    # that lost its mutation from one that never had one.
     covered = {x["claim"] for x in mutate.MUTATIONS}
-    assert len(covered) >= 25, f"only {len(covered)} claims have a mutation"
+    m = re.search(r"\*\*(\d+) of the (\d+) claims carry a mutation\.\*\*", text)
+    assert m, "README no longer states a mutation coverage figure"
+    assert int(m.group(1)) == len(covered), (
+        f"README says {m.group(1)} claims carry a mutation, {len(covered)} do"
+    )
+    assert int(m.group(2)) == len(CLAIMS), (
+        f"README says {m.group(2)} claims, there are {len(CLAIMS)}"
+    )
+
+    # The front page is prose too, and it is the only place the run's own totals
+    # are printed. Nothing else reads it: both staleness claims above open
+    # verify/README.md, one directory down from it.
+    index = (pathlib.Path(__file__).resolve().parent.parent / "README.md").read_text()
+    run = re.search(r"runs \*\*(\d+) of the (\d+) claims\*\*", index)
+    tot = re.search(r"\*\*(\d+) claims pass, and (\d+) mutations are all caught\.\*\*", index)
+    end = re.search(r"With neither: (\d+) pass, (\d+)\s+skip", index)
+    assert run and tot and end, "README.md no longer states its counts"
+    for got, want, what in (
+        (run.group(2), len(CLAIMS), "claims"),
+        (tot.group(1), len(CLAIMS), "claims passing with everything set"),
+        (tot.group(2), len(mutate.MUTATIONS), "mutations"),
+    ):
+        assert int(got) == want, f"README.md says {got} {what}, there are {want}"
+    assert run.group(1) == end.group(1), (
+        f"README.md says {run.group(1)} claims run bare in one place "
+        f"and {end.group(1)} in another"
+    )
+    assert int(end.group(1)) + int(end.group(2)) == len(CLAIMS), (
+        f"README.md's {end.group(1)} passing + {end.group(2)} skipping "
+        f"is not {len(CLAIMS)}"
+    )
 
 
 @claim(
@@ -2142,10 +2175,13 @@ def _(ctx):
 @claim(
     "readme-lists-every-document",
     "README.md",
-    "README.md links every document in the folder, and links nothing that "
-    "is not there.",
+    "README.md links every document in the folder.",
 )
 def _(ctx):
+    # Only this direction. The converse - that it links nothing which is not
+    # there - is `documents-have-no-dangling-links`, which sweeps every *.md in
+    # the repository and so covers this file too. Asserting it a second time
+    # here would be an assertion that cannot fail, which is worse than none.
     import pathlib
 
     root = pathlib.Path(__file__).resolve().parent.parent

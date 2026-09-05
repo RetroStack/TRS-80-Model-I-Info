@@ -25,13 +25,13 @@ sys.path.insert(0, str(HERE))
 import claims as claims_mod  # noqa: E402
 import netlist as nl  # noqa: E402
 
-REPO = HERE.parent.parent
+REPO = HERE.parent
 CACHE = Path(os.environ.get("TMPDIR", "/tmp")) / "trs80-verify-cache"
 
 # ROM images are third-party firmware and are not in this repository. TRS80_ROMS
-# names a directory holding them; a sibling or parent `roms/` is used if one
-# happens to be there, which is what lets this run unchanged inside the
-# emulator's own tree.
+# names a directory holding them; a `roms/` inside this repository or beside it
+# is used if one happens to be there, which is what lets this run unchanged
+# inside a tree that already has the images.
 ROM_DIRS = [Path(d) for d in (os.environ.get("TRS80_ROMS"),) if d]
 ROM_DIRS += [REPO / "roms", REPO.parent / "roms"]
 
@@ -69,7 +69,7 @@ def self_test(ctx):
     """Validate the parser against KiCad's own XML export - a different format
     down a different code path. This is what makes the rest trustworthy."""
     print("Parser self-test (s-expression vs KiCad XML)")
-    bad = 0
+    bad = checked = 0
     for name in nl.BOARDS:
         try:
             mine = ctx.board(name)
@@ -98,10 +98,24 @@ def self_test(ctx):
 
         ok = mc == xc and set(mn) == set(xn) and part(mn) == part(xn)
         bad += 0 if ok else 1
+        checked += 1
         print(f"  {name:10} {'OK' if ok else 'MISMATCH':9} "
               f"{len(mc):4} comps  {len(mn):5} pins")
-    print(f"  => {'parser validated' if bad == 0 else f'{bad} board(s) mismatched'}\n")
-    return bad == 0
+
+    # A skip is not a pass. Counting only mismatches let this print "parser
+    # validated" on a tree where every board skipped and nothing was compared
+    # at all - the one failure mode a self-test must not have, since the rest
+    # of the harness rests on this having happened.
+    total = len(nl.BOARDS)
+    if checked == 0:
+        print(f"  => validated nothing: all {total} boards skipped. The XML "
+              f"cross-check needs kicad-cli and TRS80_SCHEMATICS.\n")
+        return False
+    if bad:
+        print(f"  => {bad} board(s) mismatched\n")
+        return False
+    print(f"  => parser validated on {checked} of {total} boards\n")
+    return True
 
 
 def main():

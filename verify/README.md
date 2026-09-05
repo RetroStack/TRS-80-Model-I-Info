@@ -79,6 +79,11 @@ Each mutation corrupts the data in exactly the way one claim denies, and that cl
 then required to fail. **Sixty-six mutations, sixty-six caught.** A mutation the claim
 survives is printed as `SURVIVED`, and that is a defect in the claim.
 
+**48 of the 78 claims carry a mutation.** That figure is stated rather than floored, and
+`harness-counts-are-not-stale` holds it to what `mutate.py` actually defines — a floor cannot
+tell a claim that lost its mutation from one that never had one, and a number nothing compares
+against is the trap this whole file exists to describe.
+
 A mutation is only worth as much as its reach. `nets` is the authoritative structure and
 `_pin2net`/`_pin2short` are derived from it, so a mutation that writes only the derived maps is
 not a mutation at all — every claim using `pins_on` or `partition` reads straight past it. The
