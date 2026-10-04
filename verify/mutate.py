@@ -403,12 +403,12 @@ def _(ctx):
     ctx.board("ei").comps["Z997"] = {"value": "74LS00", "sheet": "", "lib": None}
 
 
-@mutation("us-revision-differences-are-complete", "introduce a tenth difference")
+@mutation("us-revision-differences-are-complete", "introduce a twelfth difference")
 def _(ctx):
     _set(ctx.board("revg"), "Z55", "3", "CLK")
 
 
-@mutation("us-revision-differences-are-complete", "undo one of the nine")
+@mutation("us-revision-differences-are-complete", "undo one of the eleven")
 def _(ctx):
     for ref, pin in (("Z56", "6"), ("Z56", "7"), ("Z58", "6"), ("Z58", "7")):
         _set(ctx.board("revg"), ref, pin, "GND")

@@ -61,7 +61,8 @@ This is the important half, because it is what lets the rest of the documentatio
 - **The seven-bit video RAM.** The video RAM page is byte-identical in all four: seven 2102
   static RAMs and `Z30D` deriving bit 6. **No US revision has an eight-bit video RAM.**
 - The video generator, counter, latch, sync and mixer.
-- The keyboard connector, the CPU clock, reset, `/INT`, NMI and `/WAIT`.
+- The keyboard connector, the CPU clock's source and divider (only the buffer section that
+  carries it moves — difference 10), reset, `/INT`, NMI and `/WAIT`.
 - The address map.
 
 ### What differs, in order of how visible it is to software
@@ -77,6 +78,8 @@ This is the important half, because it is what lets the rest of the documentatio
 | 7 | Video sync generator | **its own wiring** | common | common | netlist |
 | 8 | Counter reset `/CLK_EN` | tied to `GND` | tied to `GND` | **a real net** | netlist |
 | 9 | `Z70B`'s clear | on the `HI` rail | on the `HI` rail | **its own net** | netlist |
+| 10 | CPU clock buffer section | **`Z72C`** (pins 6→7) | `Z72E` (12→11) | `Z72E` | netlist |
+| 11 | `Z69`/`Z70` clear and `D` | `Z74B` from `/ZRAS`; `Z69` clocked by `Z56` Q3 | same as A | **`Z74A` = NAND(`/RD`, `/WR`); `Z69` clocked by `CLK`** | netlist |
 
 ### The ROM sockets themselves do not change
 
@@ -110,6 +113,17 @@ Rev A, so that buffer keeps driving during `/TEST`; from Rev D onward it joins t
 enable spine. Visible only to a device taking over the bus, never to Z80 code.
 
 **(5)** is a real electrical difference at the Expansion Interface connector.
+
+**(10)** The CPU clock leaves `Z56` Q3 and is buffered by one section of `Z72`: section C
+(pins 6→7) on Rev A, section E (pins 12→11) from Rev D on. The signal is the same; only the gate
+carrying it moves, which matters to anyone probing it.
+
+**(11)** The net that clears the two 74LS74s `Z69`/`Z70` and feeds `Z69`'s `D` (named `MREQ`)
+changes source on Rev G. On Rev A and D it is `Z74B`, a NAND of `/ZRAS` with itself; on Rev G it
+is `Z74A`, a NAND of the CPU's `/RD` and `/WR`, so it follows a read or write strobe rather than
+the memory request. At the same time `Z69`'s clock moves from the CPU clock (`Z56` Q3) to `CLK`,
+the undivided input of `Z56`. What this does to the RAS/CAS timing in practice is not
+established here — it is recorded as a wiring difference, not interpreted.
 
 ### Rev G adds a way to stop both counters, and four pull-ups
 
@@ -156,9 +170,11 @@ to reverse-engineer from.
 
 ### The list above is complete, and that is asserted
 
-Differences 1–9 were not found by reading the drawings. Two of them — the video sync generator
+Differences 1–11 were not found by reading the drawings. Two of them — the video sync generator
 and `/CLK_EN` — were missed by exactly that method, and turned up only when every net on every
-board was compared mechanically.
+board was compared mechanically. Two more — the clock buffer section and the `Z69`/`Z70`
+control — were inside that mechanical set from the start but credited in prose to other changes,
+until a cross-check against the nets named them.
 
 So the completeness is now the claim, not the reading. Identify a net by the *set of pins on it*
 (a rename is then not a difference), drop single-pin nets (an unconnected pin's name follows its
@@ -172,12 +188,13 @@ left:
 | Rev D → Rev E | 0 | 0 |
 
 `us-revision-differences-are-complete` holds every one of those 71 nets and requires the set to
-match exactly. **A tenth difference cannot appear in these boards without the harness failing.**
+match exactly. **A twelfth difference cannot appear in these boards without the harness failing.**
 
-The counts are larger than the nine differences because one change moves several nets: splitting
+The counts are larger than the eleven differences because one change moves several nets: splitting
 `/ROM` into `/ROMA` and `/ROMB` re-hangs four gates in `Z74` and brings three of `Z73`'s into
-use, and growing `Z3` and `Z71` from 14 pins to 16 renumbers every net that touches them. Nine
-differences, seventy-one nets, and none of the seventy-one unaccounted for.
+use, and growing `Z3` and `Z71` from 14 pins to 16 renumbers every net that touches them; `Z74`
+also gives up a gate to difference 11. Eleven differences, seventy-one nets, and none of the
+seventy-one unaccounted for.
 
 ### Rev A's video sync generator is not the later one
 
