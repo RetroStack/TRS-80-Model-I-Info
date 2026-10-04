@@ -125,9 +125,9 @@ pin-level question on its own.**
 reconstruction draws; establishing which revision it documents is an open item, and until it is
 settled, claims are attributed to "the service manual" rather than to a revision.
 
-This document carries unusual weight for one reason: the reconstruction of the Expansion
-Interface cannot be machine-read (below), so for that board the manual is the only source a
-claim can be checked against by anything other than a human eye.
+It carried unusual weight while the Expansion Interface reconstruction could only be read by
+eye. That is no longer so: the board's KiCad sources yield a netlist (`netlists/ei.md`), and the
+`ei-*` claims check it mechanically. The manual remains the only source for its own text.
 
 ### RetroStack board reconstructions
 
@@ -151,10 +151,9 @@ designator against its part.
 
 **Japanese Jap50 and Jap20** — 23 sheets each, with a bill of materials.
 
-**Expansion Interface Rev D** — 14 sheets. **This PDF yields zero extractable text.** Its
-creator field says KiCad, but the text is outlined or rasterised, so nothing in it can be
-verified by extraction. Every claim sourced from it is a *visual* reading with no machine-checkable
-trace, and is weighted accordingly.
+**Expansion Interface Rev D** — 14 sheets. The PDF yields no extractable text (its text is
+outlined), but the KiCad sources export a netlist like every other board, so claims about it
+are checked against `netlists/ei.md` rather than against the drawing.
 
 **ALPS keyboard** — one sheet, and the only drawing of the key matrix, which lives on its own PCB.
 The main board's `Keyboard` sheet is just the connector.

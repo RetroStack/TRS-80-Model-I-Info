@@ -6,8 +6,13 @@ Japanese board marked **Rev HE11E011550** (drawing rev E1A, 23 sheets, KiCad 9.0
 `schematics-model-1-rev-g.md` first; this document only covers what changed.
 
 The machine is a Model I in every way software can see except two: it has **two
-character generators** with a CPU-selectable switch, and it can be built for **PAL**.
+character generators** with a CPU-selectable switch, and its **video RAM is eight bits wide**,
+so a code written to `3C00`–`3FFF` reads back unchanged. It can also be built for **PAL**.
 Everything else is repackaging.
+
+Sheet numbers in this document are the KiCad sheet numbers. The PDF prints `Power` and
+`Capacitors` as pages 14 and 15, ahead of the video sheets, so from `VideoMode` on a sheet's
+PDF page is its number plus two: `VideoMode` 14 is page 16, `VideoSync` 20 is page 22.
 
 ## Sheets with no Rev G equivalent
 

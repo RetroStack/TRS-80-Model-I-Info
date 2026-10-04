@@ -27,7 +27,7 @@ these sheets rather than by the ROM; they are listed at the end.
 | 11 | `Video` | Container sheet; the global video nets. |
 | 12 | `VideoCounter` | The dot/character/line counter chain: `Z58` (74LS92), `Z12`/`Z32`/`Z50`/`Z65` (74LS93), `Z43` (74LS157), `Z66` (74LS11). Produces `SHIFT`, `/LATCH`, `HDRV`, `VDRV`. |
 | 13 | `VideoAccessMultiplexer` | 74LS157s (`Z31`, `Z49`, `Z64`) arbitrating CPU vs. display access to video RAM. |
-| 14 | `VideoRAM` | The 1K screen: **seven** 2102s — `Z45`–`Z48` and `Z61`–`Z63` — with `Z30` (74LS02) deriving bit 6 and `Z60` (74LS367) buffering. `Z44` is on the cassette sheet, not this one. |
+| 14 | `VideoRAM` | The 1K screen: **seven** 2102s — `Z45`–`Z48` and `Z61`–`Z63` — with `Z30` (74LS02) deriving bit 6 and `Z60` (74LS367) buffering. `Z44` is drawn on the cassette sheet, but its first section buffers video RAM bits 0–3 onto `D0`–`D3` under `/VRD`. |
 | 15 | `Video Latch` | `Z7` (74LS74), `Z27` (74LS175) and `Z28` (74LS174) latching the fetched byte; `CHARGAP`, `GRAPHICS`, `/BLANK`, `/VCLR`. |
 | 16 | `VideoGen` | The **MCM6670** character generator (`Z29`), `Z10`/`Z11` (74LS166) shift registers, `Z8` (74LS153) block-graphics synthesiser, `Z9` (74LS04) and `Z26` (74LS20). |
 | 17 | `VideoSync` | Composite sync from `HDRV`/`VDRV`. |
@@ -110,9 +110,9 @@ The familiar "`INP(255)` returns 127" is only the 64-column half of that.
 
 ### The rest of the read
 
-The same 74LS367 supplies `D5` from the Expansion Interface presence line (inverted — a
-clear bit means fitted) and `D7` from the cassette input flip-flop. Bits 0–4 are not
-driven by anything and float high.
+The same 74LS367 (`Z44`, its second section, enabled by `/INSIG`) supplies `D7` from the
+cassette input flip-flop alongside `D6`. Nothing on the main board drives `D5` on a port `FF`
+read, nor bits 0–4: they float high.
 
 The cassette input path is **`Z4`** (LM3900 quad Norton amplifier), whose four sections are
 clamped between stages by `CR4`, `CR5` and `CR6`, with the reference divider built from
@@ -177,5 +177,5 @@ the table above cannot drift from the schematic.
 
 A few designators on this board are easy to transpose and worth checking twice: the 74LS156 is
 `Z21` and not `Z3`; `Z40` is the Z80 itself, not a gate; the LM3900 is `Z4`, not `Z25`; the
-cassette flip-flop is `Z24C`/`Z24D`, not `Z31`; and `Z44` is on the cassette sheet, not the
-video RAM one.
+cassette flip-flop is `Z24C`/`Z24D`, not `Z31`; and `Z44` is drawn on the cassette sheet, not
+the video RAM one, though half of it buffers video RAM reads.

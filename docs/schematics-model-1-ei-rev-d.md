@@ -36,7 +36,8 @@ Three chips, and between them they explain every aliasing quirk the emulator mod
 
 **`Z43A` (74LS30, 8-input NAND)** takes `A5`, `A6`, `A7`, `A8`, `A9`, `A10`, `A12`, `A13`.
 For `37E0` those are all high, so its output goes low. **`A4` is not one of its inputs, and
-`A4` reaches nothing else on the board.**
+no `37Ex` decode looks at it** — though it is not unused: it reaches `Z28D` (the `E8`–`EF` port
+decode, via `Z28C` to `/E8`), `Z36` and `Z45`.
 
 **`Z40A` (74LS139, half 1)**, enabled by `/RAS`, decodes `A15`/`A14`:
 
@@ -253,7 +254,8 @@ documentation:
 2. **The timer is on D7 and the floppy on D6**, from `Z49E` and `Z49F` on sheet 1, and
    confirmed independently by xtrs (`M1_TIMER_BIT 0x80`, `M1_DISK_BIT 0x40`). The order is
    easy to assume backwards.
-3. **`A4` is decoded nowhere**, so the latch block is `37E0–37FF` and `37F0–37FF` mirrors it.
+3. **`A4` is not in the `37Ex` decode**, so the latch block is `37E0–37FF` and `37F0–37FF`
+   mirrors it. (It does reach the port decode, `Z36` and `Z45`.)
 4. **The drive-motor one-shot is 2.97 s, not 3.00**, and it does not merely time the motor —
    it clears the drive-select latch, which drops `READY` through `Z46A`.
 

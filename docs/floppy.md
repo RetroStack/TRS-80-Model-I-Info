@@ -120,7 +120,9 @@ double-density tracks with a single-density controller, and it reports `DISK ERR
 banner. Real sector numbers on a Model I disk never exceed `0x12`, so the command values cannot
 collide with an ordinary sector write.
 
-`/SYSRES` returns a Percom board to the 1771 and single density.
+`/SYSRES` returns a Percom board to the 1771 and single density — the behaviour the board's
+author and xtrs agree on; the drawing's flip-flop polarity is unresolved (see the Percom
+reading).
 
 The full reading of the Percom drawings, including what is not settled about them, is
 [`schematics-percom-doubler.md`](schematics-percom-doubler.md).

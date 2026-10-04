@@ -81,8 +81,16 @@ Nothing an emulator does depends on the unresolved decode above: `FE` and `FF` b
 upper bit set, so they select correctly under either reading. What is undecided is only whether
 values like `F8` would have worked too.
 
-The flip-flop's `/MR` comes from `/SYSRES`, so a reset returns the board to single density and
-the 1771.
+The flip-flop's reset input comes from `/SYSRES`, and a reset returns the board to single
+density and the 1771.
+
+**`[unresolved]` The polarity, as drawn, does not close.** Read literally — `/DOUBLE` is `Q`,
+`D` is `DAL0`, `/SYSRES` clears the flip-flop, and `/DOUBLE` drives the active-low `/DDEN` —
+writing `FF` would latch a 1 and select single density, and a reset would select double: the
+reverse of the handwritten note. It closes if `DAL0` is the 1791's inverted data bus and
+`/SYSRES` reaches the preset rather than the clear, or if `/DOUBLE` is in fact the `/Q`. The
+scans do not show which. The behaviour stated here — `FF` double, `FE` and reset single — rests
+on the note and on xtrs, not on the gate-level reading.
 
 ## The data separator
 
