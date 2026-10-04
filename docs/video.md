@@ -90,15 +90,16 @@ They are not interchangeable, and the differences are visible in the row census:
 
 | set | what it is | row 0 | row 7 |
 |---|---|---|---|
-| `01` | the earliest, with the notorious floating `a` | blank | unused |
-| `02` | the floating `a` corrected | blank | unused |
-| `04` | adds the arrows and `£` | blank | unused |
+| `01` | the earliest, with the notorious floating `a` | blank | the font's last row |
+| `02` | the floating `a` corrected | blank | the font's last row |
+| `04` | adds the arrows and `£` | blank | the font's last row |
 | `08` | adds true descenders | used | descenders only |
 | `16` | the common late set | used | descenders only |
-| `17` | Japanese Kana | blank | unused |
+| `17` | Japanese Kana | blank | the font's last row |
 
-**Four of the six are seven-row fonts with a blank leading row.** Only `08` and `16` use all
-eight, and they use row 7 for descenders alone — a handful of glyphs, not the whole set. Which
+**Four of the six are seven-row fonts with a blank leading row**, drawn in rows 1–7. Only `08`
+and `16` use all eight, and they use row 7 for descenders alone — a handful of glyphs, not the
+whole set. Which
 of a cell's twelve scan lines the eight glyph rows land on is a separate question from what the
 ROM holds, and a font with a blank leading row will sit one line lower than one without.
 

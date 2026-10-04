@@ -831,8 +831,8 @@ def _(ctx):
 @claim(
     "chargen-row-census",
     "docs/video.md",
-    "The early character sets are 7-row fonts with a blank leading row; sets 08 "
-    "and 16 use row 7 only for descenders.",
+    "The early character sets are 7-row fonts with a blank leading row, drawn in "
+    "rows 1-7; sets 08 and 16 use row 7 only for descenders.",
 )
 def _(ctx):
     def rows(name):
@@ -843,6 +843,8 @@ def _(ctx):
     for name in (CHARGEN.format(n) for n in (1, 2, 4, 17)):
         r = rows(name)
         assert r[0] == 0, f"{name} row 0 used by {r[0]} glyphs, expected 0"
+        # A seven-row font that skips row 0 lives in rows 1-7, so its last row is row 7.
+        assert r[7] >= 100, f"{name} row 7 used by {r[7]} glyphs, expected the font's last row"
     for name in (CHARGEN.format(n) for n in (8, 16)):
         r = rows(name)
         assert r[0] > 50, f"{name} row 0 used by {r[0]}"

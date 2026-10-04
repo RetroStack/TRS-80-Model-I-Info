@@ -31,7 +31,7 @@ just checks less and says so:
 | `TRS80_ROMS` | a directory laid out like the emulator's `roms/`: `system/level2-v1.3.bin` and `char/character_set_01/02/04/08/16/17.bin` | the emulator repository below, or your own dumps |
 
 With both set, and `kicad-cli` on the path for the two claims that re-export and rule-check:
-**79 claims pass, and 68 mutations are all caught.** With neither: 63 pass, 16
+**79 claims pass, and 69 mutations are all caught.** With neither: 63 pass, 16
 skip, nothing fails.
 
 ## Where this came from

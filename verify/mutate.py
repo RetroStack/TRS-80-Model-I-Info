@@ -290,6 +290,12 @@ def _(ctx):
     ctx.patch_rom(claims_mod.L2_IMAGE, 0x041B, b"\x00")   # ADD A,20h -> ADD A,00h
 
 
+@mutation("chargen-row-census", "blank row 7 of the earliest character set")
+def _(ctx):
+    for g in range(128):
+        ctx.patch_rom(claims_mod.CHARGEN.format(1), g * 8 + 7, b"\x00")
+
+
 @mutation("rom-keyboard-scan-delays", "halve the debounce constant")
 def _(ctx):
     ctx.patch_rom(claims_mod.L2_IMAGE, 0x011E, b"\x80\x02")
