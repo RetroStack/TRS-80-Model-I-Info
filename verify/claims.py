@@ -1193,7 +1193,9 @@ def _(ctx):
     "rom-keyboard-map-arithmetic",
     "docs/keyboard.md",
     "The ROM turns a row and column into a character by row*8+col+40h, with "
-    "-70h+40h for rows 4-5, an XOR 10h above 3Ch, and a table at 0050h for row 6.",
+    "-70h+40h for rows 4-5, an XOR 10h above 3Ch, and a table at 0050h for row 6. "
+    "SHIFT adds 20h to the letters (0416h), SHIFT+down-arrow then subtracts 60h, "
+    "and the video driver folds 60-7Fh onto the codes 40-5Fh store as (0471h).",
 )
 def _(ctx):
     d = ctx.rom(L2_IMAGE)
@@ -1205,12 +1207,22 @@ def _(ctx):
         (0x042D, b"\xc6\x40\xfe\x3c"),          # ADD A,40h / CP 3Ch
         (0x0433, b"\xee\x10"),                    # XOR 10h
         (0x0443, b"\x21\x50\x00"),               # LD HL,0050h
+        (0x040B, b"\x3a\x80\x38\x47"),          # LD A,(3880h) / LD B,A: SHIFT in B
+        (0x0416, b"\xcb\x08\x30\x31\xc6\x20"),  # RRC B / JR NC / ADD A,20h
+        (0x041D, b"\x3a\x40\x38\xe6\x10"),      # LD A,(3840h) / AND 10h: down-arrow
+        (0x0424, b"\x7a\xd6\x60"),               # LD A,D / SUB 60h
+        # The display driver: CP 40h / JR C / SUB 40h / CP 20h / JR C / SUB 20h
+        (0x0471, b"\xfe\x40\x38\x08\xd6\x40\xfe\x20\x38\x02\xd6\x20"),
     ):
         assert d[addr:addr + len(want)] == want, f"{addr:04X}: {d[addr:addr+len(want)].hex()}"
 
-    def decode(row, col, shift=0):
+    def decode(row, col, shift=0, down=0):
         a = row * 8 + col + 0x40
         if a < 0x60:                       # rows 0-3
+            if shift:
+                a += 0x20
+                if down:
+                    a -= 0x60
             return a
         t = a - 0x70
         if t < 0:                          # rows 4-5
@@ -1226,6 +1238,22 @@ def _(ctx):
     assert decode(6, 0) == 0x0D
     assert [decode(0, c) for c in range(8)] == list(b"@ABCDEFG")
     assert [decode(2, c) for c in range(8)] == list(b"PQRSTUVW")
+    # Shift is not a no-op on the letters: it gives the lower-case codes, and
+    # SHIFT with down-arrow held gives the control codes.
+    assert [decode(0, c, shift=1) for c in range(8)] == list(b"`abcdefg")
+    assert decode(3, 2, shift=1) == ord("z")
+    assert [decode(0, c, shift=1, down=1) for c in range(3)] == [0x00, 0x01, 0x02]
+    assert decode(3, 2, shift=1, down=1) == 0x1A
+
+    def stored(c):                         # the fold at 0471h, for c < 80h
+        if c >= 0x40:
+            c -= 0x40
+            if c >= 0x20:
+                c -= 0x20
+        return c
+
+    # Shifted and unshifted letters reach video RAM as the same code.
+    assert all(stored(ord(u)) == stored(ord(u) + 0x20) for u in "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 
 @claim(

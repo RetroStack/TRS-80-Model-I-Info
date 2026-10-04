@@ -285,6 +285,11 @@ def _(ctx):
     ctx.patch_rom(claims_mod.L2_IMAGE, 0x0444, b"\x70")
 
 
+@mutation("rom-keyboard-map-arithmetic", "take the shift term off the letters")
+def _(ctx):
+    ctx.patch_rom(claims_mod.L2_IMAGE, 0x041B, b"\x00")   # ADD A,20h -> ADD A,00h
+
+
 @mutation("rom-keyboard-scan-delays", "halve the debounce constant")
 def _(ctx):
     ctx.patch_rom(claims_mod.L2_IMAGE, 0x011E, b"\x80\x02")
@@ -297,8 +302,10 @@ def _(ctx):
 
 @mutation("rom-images-are-the-images-named", "hand it the keyboard-bounce patch instead")
 def _(ctx):
-    # The three bytes that build differs by, all of them past the last offset
-    # any other claim reads - so this is the mutation no other claim can catch.
+    # The three bytes that build differs by. They sat past the last offset any
+    # other claim read until rom-keyboard-map-arithmetic began asserting the
+    # display driver's fold at 0471h-047Ch, which now covers 0476h as well; this
+    # claim stays the one that names the whole image.
     ctx.patch_rom(claims_mod.L2_IMAGE, 0x0476, b"\x00")
 
 

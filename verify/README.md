@@ -80,7 +80,7 @@ All seven restore from the original bytes, and the run then re-reads every one o
 reports whether anything was left behind.
 
 Each mutation corrupts the data in exactly the way one claim denies, and that claim is
-then required to fail. **Sixty-seven mutations, sixty-seven caught.** A mutation the claim
+then required to fail. **Sixty-eight mutations, sixty-eight caught.** A mutation the claim
 survives is printed as `SURVIVED`, and that is a defect in the claim.
 
 **49 of the 79 claims carry a mutation.** That figure is stated rather than floored, and

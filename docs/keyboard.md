@@ -136,8 +136,9 @@ below. Shifted legends are printed above the unshifted ones on the key cap; here
 
 ### Two characters on one key
 
-Sixteen keys carry a second legend. Every one of them is on row 4 or row 5, and the pairing is
-the same arithmetic in each case: **shift toggles bit 4 of the code**.
+Sixteen keys have a second, shifted character — fifteen with it printed on the keycap, and
+zero without. Every one of them is on row 4 or row 5, and the pairing is the same arithmetic in
+each case: **shift toggles bit 4 of the code**.
 
 | key | shifted | | key | shifted | | key | shifted |
 |---|---|---|---|---|---|---|---|
@@ -152,9 +153,16 @@ the same arithmetic in each case: **shift toggles bit 4 of the code**.
 `30h`, so shifted it is `20h` — a space. `[measured]` at the `READY` prompt: `SHIFT`+`Ø` advances
 the cursor by one, `SHIFT`+`1` prints `!`.
 
-The letters carry no second legend because shift does nothing to them: the ROM's row 0–3
-arithmetic has no shift term at all, which is the whole reason a stock Model I is upper-case
-only.
+The letters carry no second legend, but shift is not inert on them. For rows 0–3 the ROM
+holds the `3880h` row in `B` (`040Bh`) and, with `SHIFT` down, adds `20h` (`RRC B / JR NC /
+ADD A,20h` at `0416h`): shifted `@` and `A`–`Z` return `60h`–`7Ah`, the lower-case codes. With
+`↓` held as well (`3840h` bit 4, tested at `041Dh`) it then subtracts `60h`, giving the control
+codes `00h`–`1Ah`.
+
+A stock Model I is upper-case only for a different reason: the Level II video driver folds
+`60h`–`7Fh` onto the same stored codes as `40h`–`5Fh` before writing the screen (`CP 40h / JR C
+/ SUB 40h / CP 20h / JR C / SUB 20h` at `0471h`), and the 7-bit video RAM could not hold
+`61h`–`7Ah` in any case — see [video.md](video.md).
 
 The four arrows do have shifted codes, from the table at `0050h` rather than from arithmetic:
 `SHIFT`+`↑` gives `1Bh` (escape), `SHIFT`+`←` gives `18h`, `SHIFT`+`→` gives `19h`, and
